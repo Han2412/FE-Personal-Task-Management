@@ -13,7 +13,7 @@ import EditTaskForm from "../components/EditTaskForm";
 import StatsPie from "../components/StatsPie";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // chỉnh lại nếu server khác port
+   baseURL: import.meta.env.VITE_API_BASE || 'http://localhost:5000/api'
 });
 
 export default function Home() {
@@ -46,6 +46,7 @@ export default function Home() {
     try {
       const res = await API.get("/todos", { params: q });
       setData(res.data);
+      console.log("list",data)
     } catch (err) {
       console.error("Fetch error", err);
     }
