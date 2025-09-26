@@ -8,7 +8,7 @@ import {
 } from "react-icons/ai";
 import axios from "axios";
 import { formatDate } from "../utils/date";
-import EditTaskForm from "./EditTaskForm";
+import EditTaskForm from "../components/EditTaskForm";
 const API = axios.create({
   baseURL: "http://localhost:5000/api", // chỉnh lại nếu server khác port
 });
