@@ -6,16 +6,24 @@ import {
   AiOutlineCalendar,
   AiFillPieChart,
 } from "react-icons/ai";
+
 import axios from "axios";
 import { formatDate } from "../utils/date";
 import EditTaskForm from "../components/EditTaskForm";
+import StatsPie from "../components/StatsPie";
+
 const API = axios.create({
   baseURL: "http://localhost:5000/api", // chỉnh lại nếu server khác port
 });
 
 export default function Home() {
   const [editingTask, setEditingTask] = useState(null);
+  // logic stastic
+  const [showStas, setShowstas] = useState(false);
+  const [Stas, setStas] = useState({ done: 0, total: 0 });
+  // Update todos
 
+  // Pagination và filter
   const [q, setQ] = useState({
     page: 1,
     limit: 8,
@@ -32,6 +40,7 @@ export default function Home() {
   });
 
   const [title, setTitle] = useState("");
+
   // 🔹 Fetch list từ server
   const fetchTasks = async () => {
     try {
@@ -82,6 +91,7 @@ export default function Home() {
     fetchTasks();
   }, [q]);
 
+  // 🔹 Update (form edit Name Task)
   const handleUpdate = async (task) => {
     try {
       await API.put(`/todos/${task._id}`, task);
@@ -92,8 +102,18 @@ export default function Home() {
     }
   };
 
-  // component form edit (nằm ngoài return, trên cùng file)
+  // Form set data for Stastic
+  const FectStatic = async () => {
+    const res = await API.get("/todos/stats");
+    setStas(res.data);
+  };
+  // show UI Stastic
+  const handleStasBtn = () => {
+    FectStatic();
+    setShowstas((prev) => !prev);
+  };
 
+  
   return (
     <div className="mx-auto max-w-4xl  space-y-6 flex flex-col justify-center border rounded-lg border-blue mt-10">
       {/* Add new task */}
@@ -130,35 +150,40 @@ export default function Home() {
               </option>
             </select>
 
-            <button className="px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1 cursor-pointer">
+            {/* Statistics */}
+            <button
+              className="px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1 cursor-pointer"
+              onClick={handleStasBtn}
+            >
               Statistics <AiFillPieChart />
             </button>
           </div>
+          {/* component ui stastic */}
+          {showStas && (
+            <div className="w-full mt-4 bg-white rounded-lg p-4 shadow">
+              <StatsPie stats={Stas} />
+            </div>
+          )}
+
           {/* Date */}
-          <div className="flex items-center gap-3 text-black">
-            <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Từ ngày</label>
-              <input
-                type="date"
-                value={q.from}
-                onChange={(e) => setQ((s) => ({ ...s, from: e.target.value }))}
-                className="border bg-blue-50 rounded-lg px-3 py-2 text-center outline-none focus:ring-2 focus:ring-blue-400 w-40"
-              />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Đến ngày</label>
-              <input
-                type="date"
-                value={q.to}
-                onChange={(e) => setQ((s) => ({ ...s, to: e.target.value }))}
-                className="border bg-blue-50 rounded-lg px-3 py-2 text-center outline-none focus:ring-2 focus:ring-blue-400 w-40"
-              />
-            </div>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={q.from}
+              onChange={(e) => setQ((s) => ({ ...s, from: e.target.value }))}
+              className="border rounded px-2 py-1"
+            />
+            <input
+              type="date"
+              value={q.to}
+              onChange={(e) => setQ((s) => ({ ...s, to: e.target.value }))}
+              className="border rounded px-2 py-1"
+            />
             <button
-              onClick={() => setQ((s) => ({ ...s, from: "", to: "" }))}
-              className="self-end px-3 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700"
+              onClick={() => fetchTasks()} // chỉ cần gọi lại API
+              className="px-3 py-1 rounded bg-blue-600 text-white"
             >
-              Reset
+              Apply
             </button>
           </div>
         </div>
